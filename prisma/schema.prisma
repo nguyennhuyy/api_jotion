@@ -19,5 +19,15 @@ model User {
   password String
   address String
   typeLogin String?
+  createdAt DateTime?
+  updatedAt DateTime?
 }
 
+model GeneratorOtp {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  email String
+  type String
+  otp String
+  createdAt DateTime
+  updatedAt DateTime
+}
