@@ -6,8 +6,20 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
 import { OtpModule } from './otp/otp.module';
+import { MediaModule } from './media/media.module';
+import { EventsModule } from './events/events.module';
+import { DocumentsModule } from './documents/documents.module';
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, MailerModule, OtpModule],
+  imports: [
+    PrismaModule,
+    UsersModule,
+    AuthModule,
+    MailerModule,
+    OtpModule,
+    MediaModule,
+    EventsModule,
+    DocumentsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

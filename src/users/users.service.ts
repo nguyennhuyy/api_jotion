@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -6,25 +6,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
-    const users = await this.prisma.user.findMany();
-    return users;
-  }
-
-  async findOne(id: string) {
-    return await this.prisma.user.findUnique({
+  async getInfo(id: string) {
+    const user = await this.prisma.user.findFirst({
       where: {
-        id: id,
+        id,
       },
     });
+
+    if (!user) throw new NotFoundException('user not found');
+    delete user.password;
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     console.log('updateUserDto', updateUserDto);
     return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }
