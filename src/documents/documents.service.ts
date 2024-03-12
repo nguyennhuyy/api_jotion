@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCoverDto } from './dto/update-cover.dto';
+import { UpdatePublishDto } from './dto/update-publish.dto';
 
 @Injectable()
 export class DocumentsService {
@@ -40,11 +41,11 @@ export class DocumentsService {
     }
   }
 
-  async updateCover(id: string, body: UpdateCoverDto) {
+  async updateCover(body: UpdateCoverDto) {
     try {
       const document = this.prisma.documents.update({
         where: {
-          id: id,
+          id: body.id,
         },
         data: {
           coverImage: body.coverImage,
@@ -52,7 +53,22 @@ export class DocumentsService {
       });
       return document;
     } catch (error) {
-      // throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+  async updatePublishDocument(body: UpdatePublishDto) {
+    try {
+      const document = this.prisma.documents.update({
+        where: {
+          id: body.id,
+        },
+        data: {
+          isPublished: body.isPublished,
+        },
+      });
+      return document;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 }

@@ -5,7 +5,6 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { jwtConstants } from './constants';
 import { OtpService } from 'src/otp/otp.service';
 
 @Module({
@@ -15,7 +14,7 @@ import { OtpService } from 'src/otp/otp.service';
     PrismaModule,
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60d' },
     }),
     HttpModule,

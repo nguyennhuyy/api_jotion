@@ -1,10 +1,14 @@
-import { Injectable, UploadedFile } from '@nestjs/common';
+import { BadRequestException, Injectable, UploadedFile } from '@nestjs/common';
 import { MinioService } from 'nestjs-minio-client';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Stream } from 'stream';
 
 @Injectable()
 export class MediaService {
-  constructor(private readonly minioService: MinioService) {}
+  constructor(
+    private readonly minioService: MinioService,
+    private readonly cloudinary: CloudinaryService,
+  ) {}
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     return new Promise((resolve, reject) => {
       try {
@@ -31,5 +35,16 @@ export class MediaService {
         reject(error);
       }
     });
+  }
+
+  async uploadFileCloud(@UploadedFile() file: Express.Multer.File) {
+    try {
+      const response = await this.cloudinary.uploadImage(file);
+      return {
+        url: response.url,
+      };
+    } catch (error) {
+      throw new BadRequestException('File không đúng định dạng');
+    }
   }
 }

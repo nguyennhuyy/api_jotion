@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { UpdateCoverDto } from './dto/update-cover.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UpdatePublishDto } from './dto/update-publish.dto';
 
 @Controller('documents')
 export class DocumentsController {
@@ -18,9 +27,19 @@ export class DocumentsController {
     return this.documentsSerivce.removeCoverImage(id);
   }
 
-  @Patch('update-cover/:id')
+  @Put('update-cover')
   @UseGuards(AuthGuard)
-  async updateCover(@Param('id') id: string, @Body() body: UpdateCoverDto) {
-    return this.documentsSerivce.updateCover(id, body);
+  async updateCover(@Body() body: UpdateCoverDto) {
+    return this.documentsSerivce.updateCover(body);
+  }
+
+  @Get('public/:id')
+  async getPublicDetailDocument(@Param('id') id: string) {
+    return this.documentsSerivce.getDetailDocument(id);
+  }
+
+  @Patch('public/update')
+  async updatePublishDocument(@Body() body: UpdatePublishDto) {
+    return this.documentsSerivce.updatePublishDocument(body);
   }
 }

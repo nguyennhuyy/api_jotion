@@ -7,18 +7,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Documents {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  content        String
-  coverImage     String?
-  createdAt      DateTime @db.Date
-  icon           String?
-  isArchived     Boolean?
-  isPublished    Boolean?
-  title          String
-  updatedAt      DateTime @db.Date
-  userId         String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  content     String?
+  coverImage  String?
+  createdAt   DateTime @db.Date
+  icon        String?
+  isArchived  Boolean?
+  isPublished Boolean?
+  title       String
+  updatedAt   DateTime @db.Date
+  userId      String
 
   @@index([userId])
 }
@@ -32,7 +31,6 @@ model GeneratorOtp {
   updatedAt DateTime @db.Date
 }
 
-
 model User {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   address   String?
@@ -43,6 +41,26 @@ model User {
   password  String
   phone     String?
   userId    String?
-  typeLogin String? @default("default")
+  typeLogin String?  @default("default")
   updatedAt DateTime @db.Date
+}
+
+model WorkSpaceCol {
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  work      WorkSpace[] @relation("WorkSpaceItem")
+  createdAt DateTime    @default(now()) @db.Date
+  updatedAt DateTime    @default(now()) @db.Date
+}
+
+model WorkSpace {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  content        String
+  avatar         String?
+  tags           String[]
+  WorkSpaceCol   WorkSpaceCol? @relation("WorkSpaceItem", fields: [workSpaceColId], references: [id])
+  workSpaceColId String        @db.ObjectId
+  createdAt      DateTime      @default(now()) @db.Date
+  updatedAt      DateTime      @default(now()) @db.Date
 }

@@ -9,6 +9,8 @@ import { OtpModule } from './otp/otp.module';
 import { MediaModule } from './media/media.module';
 import { EventsModule } from './events/events.module';
 import { DocumentsModule } from './documents/documents.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { WorkspaceModule } from './workspace/workspace.module';
 @Module({
   imports: [
     PrismaModule,
@@ -19,6 +21,8 @@ import { DocumentsModule } from './documents/documents.module';
     MediaModule,
     EventsModule,
     DocumentsModule,
+    CloudinaryModule,
+    WorkspaceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -13,6 +13,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { DeleteDocumentDto } from './dto/delete-document.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
+import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { UpdateTitleDto } from './dto/update-title.dto';
+import { UpdateIconDto } from './dto/update-icon.dto';
+import { EventsGuard } from './events.guard';
 
 @WebSocketGateway({
   cors: {
@@ -32,6 +36,7 @@ export class EventsGateway
   handleDisconnect() {}
 
   @SubscribeMessage('getDocument')
+  @UseGuards(EventsGuard)
   async handleJoinRoom(client: Socket, data: CreateDocumentDto): Promise<void> {
     client.join(data.userId);
     const documents = await this.prisma.documents.findMany({
@@ -46,6 +51,7 @@ export class EventsGateway
   }
 
   @SubscribeMessage('createDocument')
+  @UseGuards(EventsGuard)
   async createDocument(
     @MessageBody() data: CreateDocumentDto,
     @ConnectedSocket() client: Socket,
@@ -65,9 +71,8 @@ export class EventsGateway
         isArchived: false,
         isPublished: false,
         icon: null,
-        content: '',
-        coverImage:
-          'https://images.unsplash.com/photo-1543906965-f9520aa2ed8a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=4800',
+        content: null,
+        coverImage: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -77,6 +82,7 @@ export class EventsGateway
   }
 
   @SubscribeMessage('deleteDocument')
+  @UseGuards(EventsGuard)
   async deleteDocument(client: Socket, data: DeleteDocumentDto) {
     try {
       client.join(data.userId);
@@ -87,11 +93,12 @@ export class EventsGateway
       });
       this.server.to(data.userId).emit('deleteDocument', document);
     } catch (error) {
-      console.log('error', error);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
   @SubscribeMessage('updateContentDocument')
+  @UseGuards(EventsGuard)
   async updateContentDocument(client: Socket, data: UpdateContentDto) {
     try {
       setTimeout(async () => {
@@ -107,9 +114,51 @@ export class EventsGateway
         });
 
         return content;
-      }, 2000);
+      }, 1500);
     } catch (error) {
-      console.log('error', error);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @SubscribeMessage('updateTitleDocument')
+  @UseGuards(EventsGuard)
+  async updateTitleDocument(client: Socket, data: UpdateTitleDto) {
+    try {
+      client.join(data.userId);
+      const content = await this.prisma.documents.update({
+        where: {
+          id: data.id,
+          userId: data.userId,
+        },
+        data: {
+          title: data.title,
+        },
+      });
+
+      this.server.to(data.userId).emit('updateTitleDocument', content);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @SubscribeMessage('updateIconDocument')
+  @UseGuards(EventsGuard)
+  async updateIconDocument(client: Socket, data: UpdateIconDto) {
+    try {
+      client.join(data.userId);
+      const content = await this.prisma.documents.update({
+        where: {
+          id: data.id,
+          userId: data.userId,
+        },
+        data: {
+          icon: data.icon,
+        },
+      });
+
+      this.server.to(data.userId).emit('updateIconDocument', content);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 }

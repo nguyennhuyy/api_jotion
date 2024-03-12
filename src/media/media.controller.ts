@@ -16,4 +16,10 @@ export class MediaController {
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     return await this.mediaService.uploadFile(file);
   }
+
+  @Post('upload-cloud')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFileCloud(@UploadedFile() file: Express.Multer.File) {
+    return await this.mediaService.uploadFileCloud(file);
+  }
 }
