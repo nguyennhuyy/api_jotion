@@ -4,5 +4,5 @@ export class DeleteItemDto {
   @IsString()
   id: string;
   @IsString()
-  workColId: string;
+  workCardId: string;
 }

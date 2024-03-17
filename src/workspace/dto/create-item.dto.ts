@@ -1,4 +1,10 @@
-import { IsArray, IsMongoId, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsMongoId,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateWorkItemDto {
   @IsString()
@@ -15,7 +21,10 @@ export class CreateWorkItemDto {
   @IsArray()
   tags?: string[];
 
+  @IsDateString()
+  @IsOptional()
+  date?: Date;
   @IsString()
   @IsMongoId()
-  workSpaceColId: string;
+  workListId: string;
 }

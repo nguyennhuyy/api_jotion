@@ -1,8 +1,8 @@
 import { IsString } from 'class-validator';
 
-export class CreateWorkSpaceDto {
+export class DeleteWorkListDto {
   @IsString()
-  title: string;
+  id: string;
 
   @IsString()
   boardId: string;
