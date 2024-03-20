@@ -12,22 +12,16 @@ import {
 import { WorkspaceService } from './workspace.service';
 import { CreateWorkSpaceDto } from './dto/create-workspace.dto';
 import { CreateWorkItemDto } from './dto/create-item.dto';
-import { DeleteItemDto } from './dto/delete-item.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateBoardDto } from './dto/create-board.dto';
-import { DeleteWorkListDto } from './dto/delete-worklist.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
+import { UpdateCardInfoDto } from './dto/update-card-info.dto';
 
 @UseGuards(AuthGuard)
 @Controller('workspace')
 export class WorkspaceController {
   constructor(private readonly workSpaceService: WorkspaceService) {}
-
-  @Get('/list/:id')
-  async getWorkList(@Param('id') id: string) {
-    return this.workSpaceService.getWorkList(id);
-  }
 
   @Post('create-board')
   async createBoard(@Req() req: Request, @Body() body: CreateBoardDto) {
@@ -40,27 +34,22 @@ export class WorkspaceController {
     return this.workSpaceService.getBoard(userId);
   }
 
+  @Get('/list/:id')
+  async getWorkList(@Param('id') id: string) {
+    return this.workSpaceService.getWorkList(id);
+  }
+
   @Post('create-list')
-  async create(
+  async createList(
     @Req() req: Request,
     @Body() createWorkSpaceDto: CreateWorkSpaceDto,
   ) {
     const userId = (req as any).user.id;
-    return await this.workSpaceService.create(userId, createWorkSpaceDto);
+    return await this.workSpaceService.createList(userId, createWorkSpaceDto);
   }
-  @Delete('delete')
-  async delete(@Body() body: DeleteWorkListDto) {
-    return this.workSpaceService.delete(body);
-  }
-
-  @Post('create-item')
-  async createWorkItem(@Body() body: CreateWorkItemDto) {
-    return this.workSpaceService.createWorkItem(body);
-  }
-
-  @Delete('delete-item')
-  async deleteWorkItem(@Body() body: DeleteItemDto) {
-    return this.workSpaceService.deleteWorkItem(body);
+  @Delete('list-delete/:id')
+  async deleteList(@Param('id') id: string) {
+    return this.workSpaceService.deleteList(id);
   }
 
   @Put('update-list')
@@ -68,8 +57,22 @@ export class WorkspaceController {
     return this.workSpaceService.updateList(body);
   }
 
+  @Post('create-card')
+  async createCard(@Body() body: CreateWorkItemDto) {
+    return this.workSpaceService.createCard(body);
+  }
+
+  @Delete('delete-card/:id')
+  async deleteCard(@Param('id') id: string) {
+    return this.workSpaceService.deleteCard(id);
+  }
   @Put('update-card')
   async updateCard(@Body() body: UpdateCardDto[]) {
     return this.workSpaceService.updateCard(body);
+  }
+
+  @Put('update-card-info')
+  async updateCardInfo(@Body() body: UpdateCardInfoDto) {
+    return this.workSpaceService.updateCardInfo(body);
   }
 }

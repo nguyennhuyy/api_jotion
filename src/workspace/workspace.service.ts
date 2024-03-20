@@ -7,15 +7,37 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateWorkSpaceDto } from './dto/create-workspace.dto';
 import { CreateWorkItemDto } from './dto/create-item.dto';
-import { DeleteItemDto } from './dto/delete-item.dto';
 import { CreateBoardDto } from './dto/create-board.dto';
-import { DeleteWorkListDto } from './dto/delete-worklist.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
+import { UpdateCardInfoDto } from './dto/update-card-info.dto';
 
 @Injectable()
 export class WorkspaceService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createBoard(userId: string, body: CreateBoardDto) {
+    const board = await this.prisma.workBoard.create({
+      data: {
+        userId,
+        ...body,
+      },
+    });
+    return board;
+  }
+
+  async getBoard(userId: string) {
+    try {
+      const boards = await this.prisma.workBoard.findMany({
+        where: {
+          userId,
+        },
+      });
+      return boards;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
 
   async getWorkList(id: string) {
     try {
@@ -50,28 +72,7 @@ export class WorkspaceService {
     }
   }
 
-  async createBoard(userId: string, body: CreateBoardDto) {
-    const board = await this.prisma.workBoard.create({
-      data: {
-        userId,
-        ...body,
-      },
-    });
-    return board;
-  }
-  async getBoard(userId: string) {
-    try {
-      const boards = await this.prisma.workBoard.findMany({
-        where: {
-          userId,
-        },
-      });
-      return boards;
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
-    }
-  }
-  async create(userId: string, createWorkSpaceDto: CreateWorkSpaceDto) {
+  async createList(userId: string, createWorkSpaceDto: CreateWorkSpaceDto) {
     try {
       const list = await this.prisma.workList.create({
         data: {
@@ -87,21 +88,29 @@ export class WorkspaceService {
     }
   }
 
-  async delete(body: DeleteWorkListDto) {
+  async deleteList(id: string) {
     try {
-      const deleteCol = await this.prisma.workList.delete({
-        where: body,
+      const deleteList = this.prisma.workList.delete({
+        where: {
+          id,
+        },
       });
-      return {
-        message: `Xoá thành công cột ${deleteCol.title}`,
-        data: deleteCol,
-      };
+      const deleteCard = this.prisma.workCard.deleteMany({
+        where: {
+          workListId: id,
+        },
+      });
+      const transaction = await this.prisma.$transaction([
+        deleteCard,
+        deleteList,
+      ]);
+      return transaction;
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
-  async createWorkItem(body: CreateWorkItemDto) {
+  async createCard(body: CreateWorkItemDto) {
     try {
       const { workListId } = body;
       if (!workListId)
@@ -140,44 +149,15 @@ export class WorkspaceService {
     }
   }
 
-  async deleteWorkItem(body: DeleteItemDto) {
+  async deleteCard(id: string) {
     try {
-      const { id, workCardId } = body;
-      if (!id || !workCardId)
-        throw new HttpException('Bắt buộc có id cột', HttpStatus.BAD_REQUEST);
-
       const workDelete = await this.prisma.workCard.delete({
         where: {
           id,
-          workListId: workCardId,
         },
       });
 
-      return {
-        message: `Xoá thành công workspace ${workDelete.title}`,
-        data: workDelete,
-      };
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
-    }
-  }
-
-  async updateList(body: UpdateListDto[]) {
-    try {
-      const transaction = body.map((list) =>
-        this.prisma.workList.update({
-          where: {
-            id: list.id,
-            boardId: list.boardId,
-          },
-          data: {
-            order: list.order,
-          },
-        }),
-      );
-      const updateBoard = this.prisma.$transaction(transaction);
-
-      return updateBoard;
+      return workDelete;
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
@@ -193,6 +173,7 @@ export class WorkspaceService {
           data: {
             order: card.order,
             workListId: card.workListId,
+            updatedAt: new Date(),
           },
         }),
       );
@@ -201,5 +182,40 @@ export class WorkspaceService {
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async updateList(body: UpdateListDto[]) {
+    try {
+      const transaction = body.map((list) =>
+        this.prisma.workList.update({
+          where: {
+            id: list.id,
+            boardId: list.boardId,
+          },
+          data: {
+            order: list.order,
+            updatedAt: new Date(),
+          },
+        }),
+      );
+      const updateBoard = this.prisma.$transaction(transaction);
+
+      return updateBoard;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateCardInfo(body: UpdateCardInfoDto) {
+    const { id, ...rest } = body;
+    const card = await this.prisma.workCard.update({
+      where: { id },
+      data: {
+        ...rest,
+        updatedAt: new Date(),
+      },
+    });
+
+    return card;
   }
 }
