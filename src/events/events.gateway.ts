@@ -18,6 +18,14 @@ import { UpdateTitleDto } from './dto/update-title.dto';
 import { UpdateIconDto } from './dto/update-icon.dto';
 import { EventsGuard } from './events.guard';
 
+type SocketImplements = Socket & {
+  user: {
+    email: string;
+    id: string;
+    iat: number;
+  };
+};
+
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -37,17 +45,18 @@ export class EventsGateway
 
   @SubscribeMessage('getDocument')
   @UseGuards(EventsGuard)
-  async handleJoinRoom(client: Socket, data: CreateDocumentDto): Promise<void> {
-    client.join(data.userId);
+  async handleJoinRoom(client: SocketImplements): Promise<void> {
+    const userId = client?.user?.id;
+    client.join(userId);
     const documents = await this.prisma.documents.findMany({
       where: {
-        userId: data.userId,
+        userId: userId,
       },
       orderBy: {
         id: 'desc',
       },
     });
-    this.server.to(data.userId).emit('getDocument', documents);
+    this.server.to(userId).emit('getDocument', documents);
   }
 
   @SubscribeMessage('createDocument')
@@ -99,22 +108,27 @@ export class EventsGateway
 
   @SubscribeMessage('updateContentDocument')
   @UseGuards(EventsGuard)
-  async updateContentDocument(client: Socket, data: UpdateContentDto) {
+  async updateContentDocument(_client: Socket, data: UpdateContentDto) {
     try {
-      setTimeout(async () => {
-        client.join(data.userId);
-        const content = await this.prisma.documents.update({
-          where: {
-            id: data.id,
-            userId: data.userId,
-          },
-          data: {
-            content: data.content,
-          },
-        });
-
-        return content;
-      }, 1500);
+      const content = await new Promise((resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            const updatedContent = await this.prisma.documents.update({
+              where: {
+                id: data?.id,
+                userId: data?.userId,
+              },
+              data: {
+                content: data?.content,
+              },
+            });
+            resolve(updatedContent);
+          } catch (error) {
+            reject(error);
+          }
+        }, 1500);
+      });
+      return content;
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
@@ -124,11 +138,11 @@ export class EventsGateway
   @UseGuards(EventsGuard)
   async updateTitleDocument(client: Socket, data: UpdateTitleDto) {
     try {
-      client.join(data.userId);
+      client.join(data?.userId);
       const content = await this.prisma.documents.update({
         where: {
-          id: data.id,
-          userId: data.userId,
+          id: data?.id,
+          userId: data?.userId,
         },
         data: {
           title: data.title,

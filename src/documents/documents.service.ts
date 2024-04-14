@@ -4,9 +4,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import OpenAI from 'openai';
+
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCoverDto } from './dto/update-cover.dto';
 import { UpdatePublishDto } from './dto/update-publish.dto';
+
+const openai = new OpenAI({
+  apiKey: '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',
+});
 
 @Injectable()
 export class DocumentsService {
@@ -67,6 +73,19 @@ export class DocumentsService {
         },
       });
       return document;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async writeContentAI(content: string) {
+    try {
+      console.log('content', content);
+      const chatCompletion = await openai.chat.completions.create({
+        messages: [{ role: 'user', content }],
+        model: 'gpt-3.5-turbo',
+      });
+      return chatCompletion;
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }

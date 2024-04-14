@@ -7,10 +7,15 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
-type RequestGuard = Request & {
+export type RequestGuard = Request & {
   handshake: {
     auth: {
       authorization: string;
+    };
+    user: {
+      email: string;
+      id: string;
+      iat: number;
     };
   };
 };

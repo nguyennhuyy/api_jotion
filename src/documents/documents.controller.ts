@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -41,5 +42,9 @@ export class DocumentsController {
   @Patch('public/update')
   async updatePublishDocument(@Body() body: UpdatePublishDto) {
     return this.documentsSerivce.updatePublishDocument(body);
+  }
+  @Post('/ai-content')
+  async writeContentAI(@Body('content') content: string) {
+    return this.documentsSerivce.writeContentAI(content);
   }
 }
