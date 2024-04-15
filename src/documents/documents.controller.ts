@@ -44,7 +44,7 @@ export class DocumentsController {
     return this.documentsSerivce.updatePublishDocument(body);
   }
   @Post('/ai-content')
-  async writeContentAI(@Body('content') content: string) {
-    return this.documentsSerivce.writeContentAI(content);
+  async writeContentAI(@Body('prompt') prompt: string) {
+    return this.documentsSerivce.writeContentAI(prompt);
   }
 }

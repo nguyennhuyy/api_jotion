@@ -11,6 +11,7 @@ import { EventsModule } from './events/events.module';
 import { DocumentsModule } from './documents/documents.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { WorkspaceModule } from './workspace/workspace.module';
+import { GeminiaiModule } from './geminiai/geminiai.module';
 @Module({
   imports: [
     PrismaModule,
@@ -23,6 +24,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
     DocumentsModule,
     CloudinaryModule,
     WorkspaceModule,
+    GeminiaiModule,
   ],
   controllers: [AppController],
   providers: [AppService],

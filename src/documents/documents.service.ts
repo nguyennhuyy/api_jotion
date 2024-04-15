@@ -4,19 +4,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import OpenAI from 'openai';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCoverDto } from './dto/update-cover.dto';
 import { UpdatePublishDto } from './dto/update-publish.dto';
-
-const openai = new OpenAI({
-  apiKey: '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',
-});
+import { GeminiaiService } from 'src/geminiai/geminiai.service';
 
 @Injectable()
 export class DocumentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gemini: GeminiaiService,
+  ) {}
   async getDetailDocument(id: string) {
     try {
       const documents = await this.prisma.documents.findFirst({
@@ -78,14 +77,12 @@ export class DocumentsService {
     }
   }
 
-  async writeContentAI(content: string) {
+  async writeContentAI(prompt: string) {
     try {
-      console.log('content', content);
-      const chatCompletion = await openai.chat.completions.create({
-        messages: [{ role: 'user', content }],
-        model: 'gpt-3.5-turbo',
-      });
-      return chatCompletion;
+      const chat = this.gemini.model.generateContent(prompt);
+      const response = (await chat).response;
+      const text = response.text();
+      return text;
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
