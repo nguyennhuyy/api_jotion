@@ -45,6 +45,7 @@ export class DocumentsController {
   }
   @Post('/ai-content')
   async writeContentAI(@Body('prompt') prompt: string) {
+    console.log('>>>write content');
     return this.documentsSerivce.writeContentAI(prompt);
   }
 }

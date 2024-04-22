@@ -26,6 +26,7 @@ type SocketImplements = Socket & {
   };
 };
 
+@UseGuards(EventsGuard)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -44,7 +45,6 @@ export class EventsGateway
   handleDisconnect() {}
 
   @SubscribeMessage('getDocument')
-  @UseGuards(EventsGuard)
   async handleJoinRoom(client: SocketImplements): Promise<void> {
     const userId = client?.user?.id;
     client.join(userId);
@@ -60,7 +60,6 @@ export class EventsGateway
   }
 
   @SubscribeMessage('createDocument')
-  @UseGuards(EventsGuard)
   async createDocument(
     @MessageBody() data: CreateDocumentDto,
     @ConnectedSocket() client: Socket,
@@ -91,7 +90,6 @@ export class EventsGateway
   }
 
   @SubscribeMessage('deleteDocument')
-  @UseGuards(EventsGuard)
   async deleteDocument(client: Socket, data: DeleteDocumentDto) {
     try {
       client.join(data.userId);
@@ -107,7 +105,6 @@ export class EventsGateway
   }
 
   @SubscribeMessage('updateContentDocument')
-  @UseGuards(EventsGuard)
   async updateContentDocument(_client: Socket, data: UpdateContentDto) {
     try {
       const content = await new Promise((resolve, reject) => {
@@ -135,7 +132,6 @@ export class EventsGateway
   }
 
   @SubscribeMessage('updateTitleDocument')
-  @UseGuards(EventsGuard)
   async updateTitleDocument(client: Socket, data: UpdateTitleDto) {
     try {
       client.join(data?.userId);
@@ -156,7 +152,6 @@ export class EventsGateway
   }
 
   @SubscribeMessage('updateIconDocument')
-  @UseGuards(EventsGuard)
   async updateIconDocument(client: Socket, data: UpdateIconDto) {
     try {
       client.join(data.userId);
