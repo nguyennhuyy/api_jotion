@@ -58,8 +58,9 @@ export class WorkspaceController {
   }
 
   @Post('create-card')
-  async createCard(@Body() body: CreateWorkItemDto) {
-    return this.workSpaceService.createCard(body);
+  async createCard(@Req() req: Request, @Body() body: CreateWorkItemDto) {
+    const userId = (req as any).user.id;
+    return this.workSpaceService.createCard(userId, body);
   }
 
   @Delete('delete-card/:id')

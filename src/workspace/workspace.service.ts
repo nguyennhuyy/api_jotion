@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   HttpException,
   HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import * as moment from 'moment';
+
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateWorkSpaceDto } from './dto/create-workspace.dto';
 import { CreateWorkItemDto } from './dto/create-item.dto';
@@ -11,10 +14,74 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { UpdateCardInfoDto } from './dto/update-card-info.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { MailerService } from '@nestjs-modules/mailer';
 
+{
+  userIsRegistredOn: moment();
+}
 @Injectable()
 export class WorkspaceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mailerService: MailerService,
+  ) {}
+
+  @Cron(CronExpression.EVERY_10_SECONDS)
+  async handleCron() {
+    const cards = await this.prisma.workCard.findMany({
+      where: {
+        date: {
+          gte: moment().add(7, 'hour').toDate(),
+        },
+        isSendMail: false,
+      },
+    });
+
+    const promises = cards.map((card) => {
+      if (!card.isSendMail) {
+        console.log('>>>>>moment', moment().add(7, 'hour').toDate());
+        return new Promise(async (resolve, reject) => {
+          const fiveMinutesAgo = moment(card?.date).subtract(5, 'minutes');
+          try {
+            if (moment().add(7, 'hour').toDate() >= fiveMinutesAgo.toDate()) {
+              const user = await this.prisma.user.findFirst({
+                where: {
+                  id: card?.userId,
+                },
+              });
+
+              await this.mailerService.sendMail({
+                to: user?.email,
+                from: 'huy.reactjs@gmail.com',
+                subject: 'Hết hạn công việc',
+                text: 'welcome',
+                html: `<h1>Bạn có công việc ${card?.title} sắp đến hạn. Hãy quay lại và kiểm tra công việc.</h1>
+              ${!!card.content ? `<p>Công việc có nội dung: ${card.content}</p>` : ''}
+              `,
+              });
+
+              const cardUpdate = await this.prisma.workCard.update({
+                where: {
+                  id: card.id,
+                },
+                data: {
+                  isSendMail: true,
+                },
+              });
+              resolve(cardUpdate);
+            }
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    });
+    console.log('>>>>>>>cronjob send notifcation card expried', cards);
+
+    const promiseAll = await Promise.all(promises);
+    return 'ok';
+  }
 
   async createBoard(userId: string, body: CreateBoardDto) {
     const board = await this.prisma.workBoard.create({
@@ -110,7 +177,7 @@ export class WorkspaceService {
     }
   }
 
-  async createCard(body: CreateWorkItemDto) {
+  async createCard(userId: string, body: CreateWorkItemDto) {
     try {
       const { workListId } = body;
       if (!workListId)
@@ -125,7 +192,13 @@ export class WorkspaceService {
       if (!workCol) throw new NotFoundException('Không tìm thấy cột');
 
       const workCreate = await this.prisma.workCard.create({
-        data: body,
+        data: {
+          ...body,
+          date: moment(body?.date)
+            .add(7, 'hour')
+            .format('YYYY-MM-DDTHH:mm:ssZ'),
+          userId,
+        },
       });
 
       const workUpdate = await this.prisma.workList.update({

@@ -170,4 +170,24 @@ export class EventsGateway
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
+
+  // @SubscribeMessage('updateIconDocument')
+  // async sendMessage(client: Socket, data: UpdateIconDto) {
+  //   try {
+  //     client.join(data.userId);
+  //     const content = await this.prisma.documents.update({
+  //       where: {
+  //         id: data.id,
+  //         userId: data.userId,
+  //       },
+  //       data: {
+  //         icon: data.icon,
+  //       },
+  //     });
+
+  //     this.server.to(data.userId).emit('updateIconDocument', content);
+  //   } catch (error) {
+  //     throw new HttpException(error, HttpStatus.BAD_REQUEST);
+  //   }
+  // }
 }

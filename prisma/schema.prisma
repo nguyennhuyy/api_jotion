@@ -79,8 +79,10 @@ model WorkCard {
   date       DateTime?
   workList   WorkList? @relation("WorkList", fields: [workListId], references: [id])
   workListId String    @db.ObjectId
+  userId     String?
+  isSendMail Boolean   @default(false)
   createdAt  DateTime  @default(now()) @db.Date
   updatedAt  DateTime  @default(now()) @db.Date
 
-  @@index([id, workListId])
+  @@index([date, id, workListId])
 }

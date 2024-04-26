@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -12,6 +12,8 @@ import { DocumentsModule } from './documents/documents.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { GeminiaiModule } from './geminiai/geminiai.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import * as moment from 'moment-timezone';
 @Module({
   imports: [
     PrismaModule,
@@ -25,8 +27,14 @@ import { GeminiaiModule } from './geminiai/geminiai.module';
     CloudinaryModule,
     WorkspaceModule,
     GeminiaiModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  onModuleInit() {
+    moment.locale('vi');
+    moment.tz.setDefault('Asia/Ho_Chi_Minh');
+  }
+}
