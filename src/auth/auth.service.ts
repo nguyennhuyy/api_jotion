@@ -103,7 +103,7 @@ export class AuthService {
     this.mailerService.sendMail({
       to: email,
       from: 'huy.reactjs@gmail.com',
-      subject: 'Testing Nest MailerModule ✔',
+      subject: 'Mã OTP quên mật khẩu',
       text: 'welcome',
       html: `<p>mã otp của bạn là: ${JSON.stringify(otpSerivce.data.otp)}</p>`,
     });
