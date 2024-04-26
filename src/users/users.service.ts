@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -18,8 +23,24 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    console.log('updateUserDto', updateUserDto);
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          id,
+        },
+      });
+      if (!user) throw new NotFoundException('Không tồn tại người dùng');
+
+      const updateUser = await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: updateUserDto,
+      });
+      return updateUser;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 }

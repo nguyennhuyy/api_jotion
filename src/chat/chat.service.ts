@@ -1,0 +1,29 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+@Injectable()
+export class ChatService {
+  constructor(private readonly prisma: PrismaService) {}
+  async handleSearch(q: string) {
+    try {
+      const user = await this.prisma.user.findMany({
+        where: {
+          OR: [
+            {
+              fullname: { contains: q },
+            },
+          ],
+        },
+        select: {
+          fullname: true,
+          email: true,
+          avatar: true,
+          address: true,
+        },
+      });
+      return user;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
+  }
+}
