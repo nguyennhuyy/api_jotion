@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 datasource db {
@@ -43,6 +44,8 @@ model User {
   userId    String?
   typeLogin String?  @default("default")
   updatedAt DateTime @db.Date
+  @@index([fullname, email])
+
 }
 
 model WorkBoard {

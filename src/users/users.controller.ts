@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Body,
-  Patch,
-  Param,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Body, UseGuards, Req, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -23,9 +15,13 @@ export class UsersController {
     return this.usersService.getInfo(id);
   }
 
-  @Patch(':id')
+  @Post('update')
   @UseGuards(AuthGuard)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  update(
+    @Req() req: Request & UserJwtInfo,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const id = req?.user?.id;
+    return this.usersService.update(id, updateUserDto);
   }
 }

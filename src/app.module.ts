@@ -13,9 +13,11 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { GeminiaiModule } from './geminiai/geminiai.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ChatModule } from './chat/chat.module';
 import * as moment from 'moment-timezone';
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     PrismaModule,
     UsersModule,
     AuthModule,
@@ -27,7 +29,7 @@ import * as moment from 'moment-timezone';
     CloudinaryModule,
     WorkspaceModule,
     GeminiaiModule,
-    ScheduleModule.forRoot(),
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
