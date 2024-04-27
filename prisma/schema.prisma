@@ -8,6 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  fullname String
+  password String
+  role     String @default("admin")
+}
+
 model Documents {
   id          String             @id @default(auto()) @map("_id") @db.ObjectId
   content     String?
@@ -28,8 +35,8 @@ model DocumentsComment {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   userId     String
   documents  Documents @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  documentId String
-  content   String
+  documentId String    @db.ObjectId
+  content    String
   createdAt  DateTime  @default(now()) @db.Date
   updatedAt  DateTime  @default(now()) @db.Date
 }
@@ -76,7 +83,7 @@ model WorkList {
   userId    String
   cards     WorkCard[] @relation("WorkList")
   board     WorkBoard  @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  boardId   String
+  boardId   String     @db.ObjectId
   createdAt DateTime   @default(now()) @db.Date
   updatedAt DateTime   @default(now()) @db.Date
 
@@ -101,12 +108,23 @@ model WorkCard {
   @@index([date, id, workListId])
 }
 
-model MemberMessage {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String
+model MessageGroup {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  userId         String[] //userId[0]: is user create, userId[1]: is user receive
+  messageGroupId Message[]
+  createdAt      DateTime  @default(now()) @db.Date
+  updatedAt      DateTime  @default(now()) @db.Date
 }
 
 model Message {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
-  userId String
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  status    String       @default("active")
+  type      String       @default("text")
+  userId    String
+  message   String
+  group     MessageGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String       @db.ObjectId
+  createdAt DateTime     @default(now()) @db.Date
+  updatedAt DateTime     @default(now()) @db.Date
 }

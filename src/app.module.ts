@@ -14,6 +14,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { GeminiaiModule } from './geminiai/geminiai.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ChatModule } from './chat/chat.module';
+import { AdminModule } from './admin/admin.module';
 import * as moment from 'moment-timezone';
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import * as moment from 'moment-timezone';
     WorkspaceModule,
     GeminiaiModule,
     ChatModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

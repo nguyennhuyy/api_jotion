@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateGroupDto } from './dto/create-group.dto';
 
 @Injectable()
 export class ChatService {
@@ -17,5 +18,34 @@ export class ChatService {
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
+  }
+  async createGroupChat(body: CreateGroupDto) {
+    const group = await this.prisma.messageGroup.create({
+      data: {
+        name: body?.name,
+        // userId: body?.userId,
+      },
+    });
+
+    return group;
+  }
+  async getAllGroupChat(userId: string) {
+    // const messages = await this.prisma.messageGroup.findMany({
+    //   where: {
+    //     userId,
+    //   },
+    // });
+    // return messages;
+    return userId;
+  }
+
+  async detailGroup(id: string) {
+    const messages = await this.prisma.message.findMany({
+      where: {
+        groupId: id,
+      },
+    });
+
+    return messages;
   }
 }
