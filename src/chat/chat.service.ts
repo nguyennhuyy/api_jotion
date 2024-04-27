@@ -8,17 +8,9 @@ export class ChatService {
     try {
       const user = await this.prisma.user.findMany({
         where: {
-          OR: [
-            {
-              fullname: { contains: q },
-            },
-          ],
-        },
-        select: {
-          fullname: true,
-          email: true,
-          avatar: true,
-          address: true,
+          fullname: {
+            contains: q,
+          },
         },
       });
       return user;

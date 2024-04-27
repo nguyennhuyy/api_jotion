@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -9,18 +9,29 @@ datasource db {
 }
 
 model Documents {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
   content     String?
   coverImage  String?
-  createdAt   DateTime @db.Date
+  createdAt   DateTime           @db.Date
   icon        String?
   isArchived  Boolean?
   isPublished Boolean?
   title       String
-  updatedAt   DateTime @db.Date
+  updatedAt   DateTime           @db.Date
   userId      String
+  comment     DocumentsComment[]
 
   @@index([userId])
+}
+
+model DocumentsComment {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String
+  documents  Documents @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  documentId String
+  content   String
+  createdAt  DateTime  @default(now()) @db.Date
+  updatedAt  DateTime  @default(now()) @db.Date
 }
 
 model GeneratorOtp {
@@ -44,8 +55,8 @@ model User {
   userId    String?
   typeLogin String?  @default("default")
   updatedAt DateTime @db.Date
-  @@index([fullname, email])
 
+  @@index([fullname, email])
 }
 
 model WorkBoard {
@@ -88,4 +99,14 @@ model WorkCard {
   updatedAt  DateTime  @default(now()) @db.Date
 
   @@index([date, id, workListId])
+}
+
+model MemberMessage {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String
+}
+
+model Message {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String
 }

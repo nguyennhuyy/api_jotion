@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCoverDto } from './dto/update-cover.dto';
 import { UpdatePublishDto } from './dto/update-publish.dto';
 import { GeminiaiService } from 'src/geminiai/geminiai.service';
+import { CommentDto } from './dto/comment.dto';
 
 @Injectable()
 export class DocumentsService {
@@ -24,7 +25,38 @@ export class DocumentsService {
         },
       });
       if (!documents) throw new NotFoundException('Không tồn tại tài liệu');
-      return documents;
+
+      const comments = await this.prisma.documentsComment.findMany({
+        where: {
+          documentId: documents?.id,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+      const newComments = await Promise.all(
+        comments.map(async (attr) => {
+          if (attr?.userId) {
+            const user = await this.prisma.user.findFirst({
+              where: {
+                id: attr?.userId,
+              },
+            });
+
+            delete user?.password;
+            return {
+              ...attr,
+              userId: user,
+            };
+          }
+          return attr;
+        }),
+      );
+
+      return {
+        ...documents,
+        comments: newComments,
+      };
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
@@ -86,5 +118,35 @@ export class DocumentsService {
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
+  }
+  async comment(body: CommentDto) {
+    let user;
+
+    console.log('>>>>>>>body', body);
+    const document = await this.prisma.documents.findFirst({
+      where: {
+        id: body?.documentId,
+      },
+    });
+
+    if (!document) throw new NotFoundException('Không tìm workspace');
+
+    if (body.userId) {
+      user = await this.prisma.user.findFirst({
+        where: {
+          id: body?.userId,
+        },
+      });
+    }
+
+    const workComment = await this.prisma.documentsComment.create({
+      data: {
+        userId: user?.id || '',
+        documentId: document.id,
+        content: body?.content,
+      },
+    });
+
+    return workComment;
   }
 }

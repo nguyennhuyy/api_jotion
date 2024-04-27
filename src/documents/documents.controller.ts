@@ -12,6 +12,7 @@ import { DocumentsService } from './documents.service';
 import { UpdateCoverDto } from './dto/update-cover.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { UpdatePublishDto } from './dto/update-publish.dto';
+import { CommentDto } from './dto/comment.dto';
 
 @Controller('documents')
 export class DocumentsController {
@@ -43,9 +44,15 @@ export class DocumentsController {
   async updatePublishDocument(@Body() body: UpdatePublishDto) {
     return this.documentsSerivce.updatePublishDocument(body);
   }
+
   @Post('/ai-content')
   async writeContentAI(@Body('prompt') prompt: string) {
     console.log('>>>write content');
     return this.documentsSerivce.writeContentAI(prompt);
+  }
+
+  @Post('comment')
+  async comment(@Body() body: CommentDto) {
+    return this.documentsSerivce.comment(body);
   }
 }
