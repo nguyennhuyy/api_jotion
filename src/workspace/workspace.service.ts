@@ -194,9 +194,9 @@ export class WorkspaceService {
       const workCreate = await this.prisma.workCard.create({
         data: {
           ...body,
-          date: moment(body?.date)
-            .add(7, 'hour')
-            .format('YYYY-MM-DDTHH:mm:ssZ'),
+          date: body?.date
+            ? moment(body?.date).add(7, 'hour').format('YYYY-MM-DDTHH:mm:ssZ')
+            : null,
           userId,
         },
       });

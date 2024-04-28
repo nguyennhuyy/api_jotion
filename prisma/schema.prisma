@@ -59,7 +59,6 @@ model User {
   fullname  String
   password  String
   phone     String?
-  userId    String?
   typeLogin String?  @default("default")
   updatedAt DateTime @db.Date
 

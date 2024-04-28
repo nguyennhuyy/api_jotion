@@ -15,7 +15,8 @@ export class CreateWorkItemDto {
   @IsArray()
   tags?: string[];
 
-  date?: Date;
+  @IsOptional()
+  date?: Date | null;
 
   @IsString()
   @IsMongoId()
