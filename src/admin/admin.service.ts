@@ -79,17 +79,20 @@ export class AdminService {
     const promiseDocs = await this.prisma.documents.count();
     const promiseWorks = await this.prisma.workList.count();
     const promiseUsers = await this.prisma.user.count();
+    const promiseMessage = await this.prisma.message.count();
 
-    const [docs, works, users] = await Promise.all([
+    const [docs, works, users, message] = await Promise.all([
       promiseDocs,
       promiseWorks,
       promiseUsers,
+      promiseMessage,
     ]);
 
     return {
       users,
       docs,
       works,
+      message,
     };
   }
 
@@ -107,5 +110,62 @@ export class AdminService {
       },
     });
     return users;
+  }
+
+  async allDocuments() {
+    const docs = await this.prisma.documents.findMany({});
+    const documents = await Promise.all(
+      docs.map(async (doc) => {
+        const user = await this.prisma.user.findFirst({
+          where: {
+            id: doc?.userId,
+          },
+        });
+        delete user.password;
+        return {
+          ...doc,
+          userId: user,
+        };
+      }),
+    );
+    return documents;
+  }
+
+  async deleteDocument(id: string) {
+    const doc = await this.prisma.documents.delete({
+      where: {
+        id,
+      },
+    });
+    return doc;
+  }
+
+  async allWorkSpace() {
+    const docs = await this.prisma.workBoard.findMany({});
+
+    const documents = await Promise.all(
+      docs.map(async (doc) => {
+        const user = await this.prisma.user.findFirst({
+          where: {
+            id: doc?.userId,
+          },
+        });
+        delete user.password;
+        return {
+          ...doc,
+          userId: user,
+        };
+      }),
+    );
+    return documents;
+  }
+
+  async deleteWorkSpace(id: string) {
+    const doc = await this.prisma.workBoard.delete({
+      where: {
+        id,
+      },
+    });
+    return doc;
   }
 }

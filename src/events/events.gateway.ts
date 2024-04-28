@@ -17,6 +17,7 @@ import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { UpdateTitleDto } from './dto/update-title.dto';
 import { UpdateIconDto } from './dto/update-icon.dto';
 import { EventsGuard } from './events.guard';
+import { ChatDto } from './dto/chat.dto';
 
 type SocketImplements = Socket & {
   user: {
@@ -171,21 +172,24 @@ export class EventsGateway
     }
   }
 
-  @SubscribeMessage('updateIconDocument')
-  async sendMessage(client: Socket, data: UpdateIconDto) {
+  @SubscribeMessage('connection')
+  async connection() {
+    console.log('>>>>>>>Connect');
+  }
+
+  @SubscribeMessage('onChat')
+  async sendMessage(client: Socket, data: ChatDto) {
+    console.log('>>>>>>data', data);
     try {
-      client.join(data.userId);
-      const content = await this.prisma.documents.update({
-        where: {
-          id: data.id,
-          userId: data.userId,
-        },
+      const content = await this.prisma.message.create({
         data: {
-          icon: data.icon,
+          senderId: data.senderId,
+          conversationId: data?.conversationId,
+          message: data?.message,
         },
       });
 
-      this.server.to(data.userId).emit('updateIconDocument', content);
+      this.server.emit('onChat', content);
     } catch (error) {
       throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }

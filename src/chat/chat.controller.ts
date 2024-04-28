@@ -32,7 +32,9 @@ export class ChatController {
     return this.chatService.getAllGroupChat(userId);
   }
   @Get('group/:id')
-  async detailGroup(@Param('id') id: string) {
-    return this.chatService.detailGroup(id);
+  async detailGroup(@Req() req: Request, @Param('id') id: string) {
+    const userId = (req as any).user.id;
+    console.log('>>>>>>>>>id', id);
+    return this.chatService.detailGroup(id, userId);
   }
 }

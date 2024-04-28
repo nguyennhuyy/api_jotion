@@ -5,5 +5,6 @@ export class CreateGroupDto {
   name: string;
 
   @IsString()
-  userId: string;
+  type: string;
+  membersId: string[];
 }

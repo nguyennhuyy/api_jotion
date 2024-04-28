@@ -108,23 +108,24 @@ model WorkCard {
   @@index([date, id, workListId])
 }
 
-model MessageGroup {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  name           String?
-  userId         String[] //userId[0]: is user create, userId[1]: is user receive
-  messageGroupId Message[]
-  createdAt      DateTime  @default(now()) @db.Date
-  updatedAt      DateTime  @default(now()) @db.Date
+model Conversation {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String?
+  membersId String[]  @db.ObjectId
+  messages  Message[]
+  type      String    @default("individual") //or group
+  createdAt DateTime  @default(now()) @db.Date
+  updatedAt DateTime  @default(now()) @db.Date
 }
 
 model Message {
-  id        String       @id @default(auto()) @map("_id") @db.ObjectId
-  status    String       @default("active")
-  type      String       @default("text")
-  userId    String
-  message   String
-  group     MessageGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  groupId   String       @db.ObjectId
-  createdAt DateTime     @default(now()) @db.Date
-  updatedAt DateTime     @default(now()) @db.Date
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  status         String?      @default("active")
+  type           String?      @default("text")
+  message        String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String       @db.ObjectId
+  senderId       String       @db.ObjectId
+  createdAt      DateTime     @default(now()) @db.Date
+  updatedAt      DateTime     @default(now()) @db.Date
 }
